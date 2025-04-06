@@ -1,8 +1,8 @@
-FROM debian:stable-slim as build
-RUN apt update && \
-    apt install --no-install-recommends -y g++ libc-dev sqlite3 libsqlite3-dev  && \
-    apt clean && \
-    apt autoclean && \
+FROM debian:stable-slim AS build
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y g++ libc-dev sqlite3 libsqlite3-dev  && \
+    apt-get clean && \
+    apt-get autoclean && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /usr/share/doc/* 
 
