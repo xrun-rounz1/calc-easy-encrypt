@@ -91,7 +91,20 @@ unsigned int parse_params(int argc, char *argv[]) {
 }
 
 void print_version() {
-
+    std::cout << "Vocal: こめはっぱ\n";
+    std::cout << "         https://x.com/Komehappa_Shake\n";
+    std::cout << "         https://www.youtube.com/@komehappa\n";
+    std::cout << "Mix: 隆也(たかや)\n";
+    std::cout << "         https://x.com/T5SC_GD\n";
+    std::cout << "Illust: さくら ゆん\n";
+    std::cout << "         https://x.com/yunsakura_\n";
+    std::cout << "Movie: 玄月 ゆん\n";
+    std::cout << "         https://x.com/kurozuki1608\n";
+    std::cout << "\n";
+    std::cout << "Original: Calc. ジミーサムP\n";
+    std::cout << "         https://www.nicovideo.jp/watch/sm12050471\n";
+    std::cout << "         https://www.nicovideo.jp/user/7032706/mylist/8538985\n";
+    std::cout << "\n";
     std::cout << "calc-easy-decrypt version 1.0.0 (2025-04-06)\n";
     std::cout << "Developed by Mobu Ronzu(@ro_rounz1)\n";
     std::cout << std::endl;
