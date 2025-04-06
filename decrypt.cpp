@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <exception>
 #include <string_view>
+#include <limits>
 #include <sqlite3.h>
 
 #define PARAMS_VERSION 1
@@ -40,7 +41,7 @@ int get_key() {
     return result;
 }
 
-int get_utf8_encode_size(int u) {
+int get_utf8_encode_size(unsigned int u) {
     if (u > 0xffff && u <= 0x1fffff) {
         return 4;
     } else if(u > 0x07ff) {
@@ -53,7 +54,7 @@ int get_utf8_encode_size(int u) {
     return 0;
 }
 
-int utf8_encode(int u, std::string::iterator it, std::string::iterator end) {
+int utf8_encode(unsigned int u, std::string::iterator it, std::string::iterator end) {
     if (u > 0xffff && u <= 0x1fffff && std::distance(it, end) >= 4) {
         *(it + 3) = 0x80 | u & 0x3f;
         *(it + 2) = 0x80 | (u >> 6) & 0x3f;
@@ -132,14 +133,18 @@ int main(int argc, char *argv[]) {
             continue;
         }
         if(!bytestr.empty()) {
-            int codepoint;
+            unsigned int codepoint;
             try {
-                codepoint = static_cast<int>(std::stol(bytestr, nullptr, 16));
+                long value = std::stol(bytestr, nullptr, 16);
+                if(value > std::numeric_limits<unsigned int>::max()) {
+                    throw std::out_of_range("Integer overflow");
+                }
+                codepoint = static_cast<unsigned int>(value);
             } catch(std::invalid_argument) {
                 std::cerr << "bad value" << std::endl;
                 return 1;
             } catch(std::out_of_range) {
-                std::cerr << "Overflow value..." << std::endl;
+                std::cerr << "Integer overflow..." << std::endl;
                 return 1;
             }
             codepoint = codepoint ^ key;
