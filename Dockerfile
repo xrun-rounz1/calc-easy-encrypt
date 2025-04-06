@@ -1,4 +1,4 @@
-FROM debian:stable-slim AS build
+FROM debian:12.10-slim AS build
 RUN apt-get update && \
     apt-get install --no-install-recommends -y g++ libc-dev sqlite3 libsqlite3-dev  && \
     apt-get clean && \
@@ -17,7 +17,7 @@ RUN g++ -o easy-decrypt decrypt.cpp -lsqlite3
 RUN sqlite3 video.db < data.sql
 
 
-FROM gcr.io/distroless/cc-debian12:debug
+FROM gcr.io/distroless/cc-debian12:nonroot
 
 COPY --from=build /build/easy-decrypt /app/
 COPY --from=build /build/video.db /app/
