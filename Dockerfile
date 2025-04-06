@@ -1,8 +1,8 @@
 FROM debian:12.10-slim AS build
-RUN apt-get update && \
-    apt-get install --no-install-recommends -y g++ libc-dev sqlite3 libsqlite3-dev  && \
-    apt-get clean && \
-    apt-get autoclean && \
+RUN apt-get update -qq  && \
+    apt-get -qq install --no-install-recommends -y apt-utils g++ libc-dev sqlite3 libsqlite3-dev > /dev/null  && \
+    apt-get -qq clean && \
+    apt-get -qq autoclean && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /usr/share/doc/* 
 
