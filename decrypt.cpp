@@ -1,13 +1,19 @@
 #include <iostream>
 #include <string>
 #include <iomanip>
+#include <iterator>
 #include <exception>
 #include <string_view>
 #include <limits>
 #include <sqlite3.h>
 
-#define PARAMS_VERSION 1
+#ifndef DISABLE_TERMIOS
+#include <unistd.h>
+#include <termios.h>
+#endif
 
+#define PARAMS_VERSION 1
+#define PARAMS_REALTIME 2
 #define GETKEY_SQL                                                     \
     "select sum("                                                      \
     "    cast(strftime('%Y', uploaded) as integer) +"               \
@@ -17,6 +23,44 @@
     "        )) as k"                                                  \
     " from video"                                                      \
     " where id in (6529016, 9621047, 12050471);"
+
+class RealtimeModeBase {
+public:
+    virtual void enable() {}
+    virtual void disable() {}
+};
+
+class RealtimeModeTerminal : public RealtimeModeBase {
+#ifndef DISABLE_TERMIOS
+private:
+    struct termios backt;
+    bool enableflag;
+
+public:
+    void enable() override {
+        struct termios newt;
+        tcgetattr(STDIN_FILENO, &newt);
+        backt = newt;
+
+        //set
+        newt.c_lflag &= ~ICANON;
+        newt.c_cc[VTIME] = 0;
+        newt.c_cc[VMIN] = 1;
+        tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+        enableflag = true;
+    }
+    void disable() override {
+        if(!enableflag) {
+            return;
+        }
+        tcsetattr(STDIN_FILENO, TCSANOW, &backt);
+    }
+
+    ~RealtimeModeTerminal() {
+        disable();
+    }
+#endif
+};
 
 
 int get_key() {
@@ -83,6 +127,8 @@ unsigned int parse_params(int argc, char *argv[]) {
         std::string_view sv{argv[i]};
         if(sv == "--version"){
             params_flag |= PARAMS_VERSION;
+        } else if(sv == "--realtime") {
+            params_flag |= PARAMS_REALTIME;
         } else {
             throw std::runtime_error(std::string("invalid parameter: ") + sv.data());
         }
@@ -126,6 +172,11 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+    RealtimeModeTerminal realtime;
+    if(params & PARAMS_REALTIME) {
+        realtime.enable();
+    }
+
     // ======================================
     // decrypt
     int key = get_key();
@@ -164,6 +215,10 @@ int main(int argc, char *argv[]) {
             int size = get_utf8_encode_size(codepoint);
             origstr.resize(origstr.size() + size);
             utf8_encode(codepoint, origstr.begin() + point, origstr.end());
+            if(params & PARAMS_REALTIME) {
+                std::copy(origstr.begin() + point, origstr.end(), std::ostream_iterator<std::string::value_type>(std::cout));
+                std::cout.flush();
+            }
             point += size;
         }
         if (charactor == '\n' || bytestr.empty()) {
