@@ -14,6 +14,8 @@
 
 #define PARAMS_VERSION 1
 #define PARAMS_REALTIME 2
+#define PARAMS_LOGO 4
+
 #define GETKEY_SQL                                                     \
     "select sum("                                                      \
     "    cast(strftime('%Y', uploaded) as integer) +"               \
@@ -129,6 +131,8 @@ unsigned int parse_params(int argc, char *argv[]) {
             params_flag |= PARAMS_VERSION;
         } else if(sv == "--realtime") {
             params_flag |= PARAMS_REALTIME;
+        } else if(sv == "--logo") {
+            params_flag |= PARAMS_LOGO;
         } else {
             throw std::runtime_error(std::string("invalid parameter: ") + sv.data());
         }
@@ -156,6 +160,18 @@ void print_version() {
     std::cout << std::endl;
 }
 
+void print_logo() {
+    std::cout << "=========================================\n";
+    std::cout << "   ______        __         \n";
+    std::cout << "  / ____/____ _ / /_____    \n";
+    std::cout << " / /    / __ `// // ___/    \n";
+    std::cout << "/ /___ / /_/ // // /__   _  \n";
+    std::cout << "\\____/ \\__,_//_/ \\___/  (_) \n";
+    std::cout << "\n";
+    std::cout << "=========================================\n";
+    std::cout << std::endl;
+}
+
 int main(int argc, char *argv[]) {
     // 引数パース
     unsigned int params = 0;
@@ -164,6 +180,10 @@ int main(int argc, char *argv[]) {
     } catch(std::runtime_error &e) {
         std::cout << e.what() << std::endl;
         return 1;
+    }
+
+    if (params & PARAMS_LOGO) {
+        print_logo();
     }
 
     if(params & PARAMS_VERSION) {
